@@ -62,7 +62,7 @@ contract('ConverstionRate', () => {
           [jobId1]
         )
 
-        await link.transfer(rate.address, h.toWei('1'))
+        await link.transfer(rate.address, deposit)
 
         const current = await rate.currentRate.call()
         assertBigNum(h.bigNum(0), current)
@@ -93,7 +93,7 @@ contract('ConverstionRate', () => {
           [jobId1, jobId2, jobId3]
         )
 
-        await link.transfer(rate.address, h.toWei('100'))
+        await link.transfer(rate.address, deposit)
 
         const current = await rate.currentRate.call()
         assertBigNum(h.bigNum(0), current)
@@ -155,7 +155,7 @@ contract('ConverstionRate', () => {
           [jobId1, jobId2, jobId3, jobId4]
         )
 
-        await link.transfer(rate.address, h.toWei('100'))
+        await link.transfer(rate.address, deposit)
 
         const current = await rate.currentRate.call()
         assertBigNum(h.bigNum(0), current)
@@ -349,7 +349,7 @@ contract('ConverstionRate', () => {
       )
       await rate.transferOwnership(personas.Carol)
       await link.transfer(rate.address, deposit)
-      assertBigNum(h.toWei('100'), await link.balanceOf.call(rate.address))
+      assertBigNum(deposit, await link.balanceOf.call(rate.address))
     })
 
     context('when called by the owner', () => {
@@ -358,14 +358,14 @@ contract('ConverstionRate', () => {
           from: personas.Carol
         })
 
-        assertBigNum(h.toWei('0'), await link.balanceOf.call(rate.address))
+        assertBigNum(0, await link.balanceOf.call(rate.address))
         assertBigNum(deposit, await link.balanceOf.call(personas.Carol))
       })
 
       context('with a number higher than the LINK balance', () => {
         it('fails', async () => {
           await h.assertActionThrows(async () => {
-            await rate.transferLINK(personas.Carol, h.toWei('101'), {
+            await rate.transferLINK(personas.Carol, deposit.add(basePayment), {
               from: personas.Carol
             })
           })
@@ -389,8 +389,6 @@ contract('ConverstionRate', () => {
   })
 
   describe('#destroy', () => {
-    const deposit = h.toWei('100')
-
     beforeEach(async () => {
       rate = await h.deploy(
         SOURCE_PATH,
@@ -409,7 +407,7 @@ contract('ConverstionRate', () => {
       it('succeeds', async () => {
         await rate.destroy({ from: personas.Carol })
 
-        assertBigNum(h.toWei('0'), await link.balanceOf.call(rate.address))
+        assertBigNum(0, await link.balanceOf.call(rate.address))
         assertBigNum(deposit, await link.balanceOf.call(personas.Carol))
 
         assert.equal('0x', await web3.eth.getCode(rate.address))
@@ -438,7 +436,7 @@ contract('ConverstionRate', () => {
         [oc1.address],
         [jobId1]
       )
-      await link.transfer(rate.address, h.toWei('100'))
+      await link.transfer(rate.address, deposit)
     })
 
     context('when called by an authorized address', () => {
@@ -530,7 +528,7 @@ contract('ConverstionRate', () => {
 
     beforeEach(async () => {
       rate = await h.deploy(SOURCE_PATH, link.address, basePayment, 0, [], [])
-      await link.transfer(rate.address, h.toWei('10000000'))
+      await link.transfer(rate.address, deposit)
     })
 
     for (let test of tests) {
